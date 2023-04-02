@@ -18,7 +18,7 @@ install_requires = convert_deps_to_pip(pfile['packages'], r=False)
 
 setuptools.setup(
     name="bonbon",
-    version="1.1.1",
+    version="1.1.3",
     author="Binyan",
     author_email="lbyxiafei@gmail.com",
     description="A utility library to help with data processing.",

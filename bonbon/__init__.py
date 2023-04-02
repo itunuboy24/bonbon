@@ -1,3 +1,6 @@
+"""
+This is bonbon, a utility set to help with data process, key management and many other scripts/functions.
+"""
 from bonbon.local.bon_file import *
 from bonbon.local.bon_env import *
 
