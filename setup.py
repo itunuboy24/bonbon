@@ -13,11 +13,12 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 pfile = Project(chdir=False).parsed_pipfile
+print(pfile)
 install_requires = convert_deps_to_pip(pfile['packages'], r=False)
 
 setuptools.setup(
     name="bonbon",
-    version="1.1.0",
+    version="1.1.1",
     author="Binyan",
     author_email="lbyxiafei@gmail.com",
     description="A utility library to help with data processing.",
