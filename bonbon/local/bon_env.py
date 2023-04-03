@@ -10,9 +10,15 @@ from pyperclip import copy
 
 from contextlib import contextmanager
 
-
 def km(fn):
-    print(puser('KM',fn))
+    """ Decorator function to replace func string param with corresponding value from key management: ~/KM/targetFile
+
+    Args:
+        fn: file name pointing to key management service/file
+
+    Return:
+        Decorated function.
+    """
     rows = rlines(puser('KM',fn))
     kd = {}
     for row in rows:
@@ -25,6 +31,14 @@ def km(fn):
     return decorator
 
 def afk(): 
+    """ A while-true loop call to constantly move mouse up and down.
+
+    Args:
+        None
+
+    Return:
+        None
+    """
     cnt, t = 0, 60
     while True:
         if cnt % t == 0:
@@ -35,7 +49,16 @@ def afk():
         cnt+=1
 
 def hk():
-    mp = rjson('..','Scripts','hk.json')
+    """ A demon process to catch and process predefined hot keys, under ~/Scripts/hk.json.
+
+    Args:
+        <shift>+<alt>+ch: ch is within [a-z] and [0-9]
+        <shift>+<alt>+`: quit hk mode
+
+    Return:
+        None
+    """
+    mp = rjson(puser('Scripts', 'hk.json'))
     def on_activate(e):
         if e in mp:
             copy(mp[e])
@@ -85,15 +108,15 @@ def hk():
         '<shift>+<alt>+`': quit}) as h:
         h.join()
 
-def generate_hk(a='<shift>', b='<alt>'):
-    arr,t=[],ord('a')
-    for i in range(0,26):
-        c = chr(t+i)
-        print(f"'{a}+{b}+{c}': lambda: on_activate('{c}'),")
-    for i in range(0,10):
-        print(f"'{a}+{b}+{i}': lambda: on_activate('{i}'),")
-
 def monitor_mouse():
+    """Monitor and print out mouse activity.
+
+    Args:
+        None
+    
+    Return:
+        None
+    """
     with mouse.Events() as events:
         with mouse.Events() as events:
             for event in events:
@@ -107,6 +130,14 @@ def monitor_mouse():
                     print('Received event {}'.format(event))
 
 def monitor_keyboard():
+    """Monitor and print out mouse activity.
+
+    Args:
+        None
+    
+    Return:
+        None
+    """
     with keyboard.Events() as events:
         for event in events:
             if event.key == keyboard.Key.esc:

@@ -4,9 +4,7 @@ Data read functions:
 Write functions:
     wstring, astring, wjson, wcsv
 Path utilities:
-    mkdir, puser, pdownloads, pjson
-
-
+    mdir, puser, pdownloads, pjson
 """
 
 import os,sys
@@ -20,43 +18,115 @@ import pyarrow.parquet as pq
 from pandas import DataFrame
 
 def rstring(*args):
+    """Read and return string from ~/Downloads/targetFile.
+
+    Args:
+        *args: target file path
+        e.g., s=rstring('folder1','notes.txt')
+    
+    Return:
+        string in target file
+    """
     with open(pdownloads(*args), 'r', encoding='utf-8') as f:
         s = f.read()
         return s
 
 def wstring(s, *args):
+    """Write string s to ~/Downloads/targetFile
+
+    Args:
+        s: string to write
+        *args: target file path
+        e.g., wstring(s, 'folder1','notes.txt')
+    
+    Return:
+        None
+    """
     with open(pdownloads(*args), 'w') as f:
         f.write(s)
 
 def astring(s, *args):
+    """Append string s as a new line to ~/Downloads/targetFile
+
+    Args:
+        s: string to append 
+        *args: target file path
+        e.g., astring(s, 'folder1','notes.txt')
+    
+    Return:
+        None
+    """
     with open(pdownloads(*args), 'a') as f:
         f.write(f"\n{s}")
 
 def rlines(*args):
+    """Read string in lines/list from ~/Downloads/targetFile
+
+    Args:
+        *args: target file path
+        e.g., lines = rlines('folder1','notes.txt')
+    
+    Return:
+        string in lines/list
+    """
     with open(pdownloads(*args), 'r', encoding='utf-8') as f:
         lines = f.readlines()
         return lines
 
 def rjson(*args):
+    """Read json from ~/Downloads/targetFile
+
+    Args:
+        *args: target file path
+        e.g., js = rjson('folder1','notes.json')
+    
+    Return:
+        JSON format string
+    """
     with open(pdownloads(*args), 'r', encoding='utf-8') as f:
         s = f.read()
-        js = json.loads(s)
-        wjson(js, *args)
-        return js 
+        return json.loads(s)
 
 def wjson(js, *args):
-    arr = list(args)
-    t = arr.pop()
-    arr.append('JSON')
-    mdir(pdownloads(*arr))
-    arr.append(t)
-    with open(pdownloads(*arr), 'w') as f:
+    """Write JSON string to ~/Downloads/targetFile
+
+    Args:
+        s: JSON string to write
+        *args: target file path
+        e.g., wjson(s, 'folder1','notes.json')
+    
+    Return:
+        None
+    """
+    with open(pdownloads(*args), 'w') as f:
         f.write(json.dumps(js, default=_datetime_handler,
-                           sort_keys=False, indent=2))
+                    sort_keys=False, indent=2))
+
+def pjson():
+    """Parse json files under ~/Downloads/ and save copy under ~/Downloads/JSON/
+
+    Args:
+        *args: None
+        e.g., pjson()
+    
+    Return:
+        None
+    """
+    json_files = [pos_json for pos_json in os.listdir(pdownloads()) if pos_json.endswith('.json')]
+    for jfn in json_files:
+        js = rjson(jfn)
+        mdir(pdownloads('JSON'))
+        wjson(js, 'JSON', jfn)
 
 def rcsv(*args):
-    """
-    Return list of dict.
+    """Read csv from ~/Downloads/targetFile
+
+    Args:
+        *args: target file path
+        e.g., dicts = rjson('folder1','notes.csv')
+    
+    Return:
+        Return list of dict.
     """
     with open(pdownloads(*args), encoding='utf-8-sig') as f:
         row_list = []
@@ -74,6 +144,16 @@ def rcsv(*args):
         return row_list
 
 def wcsv(js, *args):
+    """Write csv (format of dict list) to ~/Downloads/targetFile
+
+    Args:
+        s: list of dicts to write
+        *args: target file path
+        e.g., wcsv(s, 'folder1','notes.json')
+    
+    Return:
+        None
+    """
     with open(pdownloads(*args), 'w') as f:
         csv_writer = csv.writer(f)
         cnt = 0
@@ -85,6 +165,15 @@ def wcsv(js, *args):
             csv_writer.writerow(row.values())
 
 def rparquet(*args):
+    """Read parquet from ~/Downloads/targetFile
+
+    Args:
+        *args: target file path
+        e.g., pqt = rparquet('folder1','notes.parquet')
+    
+    Return:
+        Return parquet in json format
+    """
     df = DataFrame(pq.read_table(pdownloads(*args)).to_pandas())
     arr = list(args)
     t = arr.pop()
@@ -93,24 +182,43 @@ def rparquet(*args):
     arr.append(f"{t}.json")
     return df.to_json(pdownloads(*arr), orient='records')
 
-def pjson():
-    json_files = [pos_json for pos_json in os.listdir(pdownloads()) if pos_json.endswith('.json')]
-    for jf in json_files:
-        rjson(jf)
-
 def pdownloads(*args):
-    """ Return dir path under default Downloads with splat(*) dir components. """
+    """ Configure file path to start with ~/Downloads/
+
+    Args:
+        *args: target file path
+        e.g., path = pdownloads('A','B','C.json')
+    
+    Return:
+        File path connects ~/Downloads/ with given args.
+    """
     arr = list(args)
     arr.insert(0,'Downloads')
     return os.path.join(os.path.expanduser('~'), *arr)
 
 def puser(*dirs):
-    """ Return dir path under default user path with splat(*) dir components. """
+    """ Configure file path to start with ~/
+
+    Args:
+        *args: target file path
+        e.g., path = puser('A','B','C.json')
+    
+    Return:
+        File path connects ~/ with given args.
+    """
     file_path = os.path.join(os.path.expanduser('~'))
     return os.path.join(file_path, *dirs)
 
 def mdir(file_path):
-    """ Generate dir with given file path. """
+    """ Generate dir with given file path.
+
+    Args:
+        file_path: given file path
+        e.g., mdir('./A/New/Folder')
+    
+    Return:
+        None
+    """
     try:
         os.makedirs(file_path, exist_ok=True)
     except OSError:
